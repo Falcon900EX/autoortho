@@ -105,7 +105,7 @@ class ConfigUI(object):
         if platform.system() == 'Windows':
             self.icon_path =os.path.join(CUR_PATH, 'imgs', 'ao-icon.ico')
         else:
-            self.icon_path =os.path.join(CUR_PATH, 'imgs', 'ao-icon.png')
+            self.icon_path = os.path.join(CUR_PATH, 'imgs', 'pygui_icon.png')
 
     def start_splash(self):
         splash_path = os.path.join(CUR_PATH, 'imgs', 'splash_silicon_mac_titled_2x.png')
@@ -166,43 +166,87 @@ class ConfigUI(object):
         #
         setup = [
             [
-                #sg.Column(
-                #    [
-                #        [sg.Image(os.path.join(CUR_PATH, 'imgs', 'ao-icon.png'))],
-                #        [sg.Text('AutoOrtho setup\n', background_color=AO_BG, text_color=AO_TEXT)]
-                #    ]
-                #),
-                sg.Image(os.path.join(CUR_PATH, 'imgs', 'banner1.png'), subsample=2),
+                sg.Frame(
+                    '',
+                    [
+                        [
+                            sg.Image(os.path.join(CUR_PATH, 'imgs', 'banner1_gui_small.png'), background_color=AO_PANEL, pad=((4, 10), (6, 6))),
+                            sg.Column(
+                                [
+                                    [
+                                        sg.Text(
+                                            'AutoOrtho',
+                                            font=("SF Pro Display", 24, "bold"),
+                                            text_color=AO_TEXT,
+                                            background_color=AO_PANEL,
+                                            pad=((8, 8), (4, 0)),
+                                        )
+                                    ],
+                                    [
+                                        sg.Text(
+                                            'FOR X-PLANE',
+                                            font=("SF Pro Text", 11, "bold"),
+                                            text_color=AO_BLUE,
+                                            background_color=AO_PANEL,
+                                            pad=((10, 8), (0, 0)),
+                                        )
+                                    ],
+                                    [
+                                        sg.Text(
+                                            'Apple Silicon Mac Edition',
+                                            font=("SF Pro Text", 12),
+                                            text_color=AO_MUTED,
+                                            background_color=AO_PANEL,
+                                            pad=((10, 8), (2, 8)),
+                                        )
+                                    ],
+                                    [
+                                        sg.Text(
+                                            'FUSE-T streaming • Live tile telemetry',
+                                            font=("SF Pro Text", 10),
+                                            text_color=AO_MUTED,
+                                            background_color=AO_PANEL,
+                                            pad=((10, 8), (0, 6)),
+                                        )
+                                    ],
+                                ],
+                                background_color=AO_PANEL,
+                                pad=((12, 0), (0, 0)),
+                            ),
+                        ],
+                    ],
+                    background_color=AO_PANEL,
+                    border_width=0,
+                    pad=((6, 6), (6, 8)),
+                )
             ],
-            #[sg.Text(f'ver: {__version__}', background_color=AO_BG, text_color=AO_TEXT)], 
-            #[sg.Image(os.path.join(CUR_PATH, 'imgs', 'flight1.png'), subsample=3)],
             [sg.HorizontalSeparator(pad=5)],
             [
-                sg.Text('Scenery install dir:', size=(18,1), background_color=AO_BG, text_color=AO_TEXT), 
-                sg.InputText(scenery_path, size=(45,1), key='scenery_path',
+                sg.Text('Scenery install dir:', size=(11,1), background_color=AO_BG, text_color=AO_TEXT), 
+                sg.InputText(scenery_path, size=(24,1), key='scenery_path',
                     metadata={'section':self.cfg.paths}), 
-                sg.FolderBrowse(key="scenery_b", target='scenery_path', initial_folder=scenery_path)
+                sg.FolderBrowse("Browse", size=(7,1), key="scenery_b", target='scenery_path', initial_folder=scenery_path)
             ],
             [
-                sg.Text('X-Plane install dir:', size=(18,1), background_color=AO_BG, text_color=AO_TEXT), 
-                sg.InputText(self.cfg.paths.xplane_path, size=(45,1), key='xplane_path',
+                sg.Text('X-Plane install dir:', size=(11,1), background_color=AO_BG, text_color=AO_TEXT), 
+                sg.InputText(self.cfg.paths.xplane_path, size=(24,1), key='xplane_path',
                     metadata={'section':self.cfg.paths}), 
-                sg.FolderBrowse(key="xplane_b", target='xplane_path', initial_folder=self.cfg.paths.xplane_path)
+                sg.FolderBrowse("Browse", size=(7,1), key="xplane_b", target='xplane_path', initial_folder=self.cfg.paths.xplane_path)
             ],
             [
-                sg.Text('Image cache dir:', size=(18,1), background_color=AO_BG, text_color=AO_TEXT),
-                sg.InputText(self.cfg.paths.cache_dir, size=(45,1),
+                sg.Text('Image cache dir:', size=(11,1), background_color=AO_BG, text_color=AO_TEXT),
+                sg.InputText(self.cfg.paths.cache_dir, size=(24,1),
                     key='cache_dir',
                     metadata={'section':self.cfg.paths}),
-                sg.FolderBrowse(key="cache_b", target='cache_dir',
+                sg.FolderBrowse("Browse", size=(7,1), key="cache_b", target='cache_dir',
                     initial_folder=self.cfg.paths.cache_dir)
             ],
             [
-                sg.Text('Temp download dir:', size=(18,1), background_color=AO_BG, text_color=AO_TEXT),
-                sg.InputText(self.cfg.paths.download_dir, size=(45,1),
+                sg.Text('Temp download dir:', size=(11,1), background_color=AO_BG, text_color=AO_TEXT),
+                sg.InputText(self.cfg.paths.download_dir, size=(24,1),
                     key='download_dir',
                     metadata={'section':self.cfg.paths}),
-                sg.FolderBrowse(key="download_b", target='download_dir',
+                sg.FolderBrowse("Browse", size=(7,1), key="download_b", target='download_dir',
                     initial_folder=self.cfg.paths.download_dir)
             ],
             [sg.HorizontalSeparator(pad=5)],
@@ -263,7 +307,17 @@ class ConfigUI(object):
                 pending_update = True
 
             if pending_update:
-                scenery.append([sg.Text(f"    Available update ver: {latest.ver}, size: {latest.totalsize/1048576:.2f} MB, downloads: {latest.download_count}", key=f"updates-{r.region_id}", background_color=AO_BG, text_color=AO_TEXT), sg.Button('Install', key=f"scenery-{r.region_id}", button_color=AO_BUTTON)])
+                scenery.append([
+                    sg.Text(
+                        f"    Update {latest.ver} available • {latest.totalsize/1048576:.0f} MB",
+                        key=f"updates-{r.region_id}",
+                        background_color=AO_BG,
+                        text_color=AO_TEXT,
+                        expand_x=True,
+                    ),
+                    sg.Push(background_color=AO_BG),
+                    sg.Button('Install', key=f"scenery-{r.region_id}", button_color=AO_BUTTON, size=(10,1)),
+                ])
             else:
                 scenery.append([sg.Text(f"    {r.region_id} is up to date!", background_color=AO_BG, text_color=AO_TEXT)])
             scenery.append([sg.HorizontalSeparator()])
@@ -273,56 +327,133 @@ class ConfigUI(object):
 
         # Hack to push the status bar to the bottom of the window
         #scenery.append([sg.Text(key='-EXPAND-', font='ANY 1', pad=(0,0), background_color=AO_BG, text_color=AO_TEXT)])
-        #scenery.append([sg.StatusBar("...", size=(74,3), key="status", auto_size_text=True, expand_x=True)])
+        #scenery.append([sg.StatusBar("...", size=(44,3), key="status", auto_size_text=True, expand_x=True)])
 
         #
         # Console logs tab
         #
         logs = [
-            [sg.Multiline(
-                "",
-                key="log",
-                size=(80,20),
-                autoscroll=True,
-                reroute_stdout=True,
-                reroute_stderr=True,
-                #echo_stdout_stderr=True,
-                expand_x=True,
-                expand_y=True
-                , background_color=AO_INPUT, text_color=AO_TEXT)
+            [
+                sg.Frame(
+                    'Live Tile Telemetry',
+                    [
+                        [
+                            sg.Text(
+                                'Streaming cache activity, FUSE-T status, and AutoOrtho runtime logs',
+                                font=("SF Pro Text", 10),
+                                text_color=AO_MUTED,
+                                background_color=AO_PANEL,
+                            )
+                        ],
+                        [
+                            sg.Multiline(
+                                "",
+                                key="log",
+                                size=(56,14),
+                                autoscroll=True,
+                                reroute_stdout=True,
+                                reroute_stderr=True,
+                                expand_x=True,
+                                expand_y=True,
+                                background_color=AO_INPUT,
+                                text_color=AO_TEXT,
+                                font=("Menlo", 11),
+                                border_width=0,
+                            )
+                        ],
+                    ],
+                    background_color=AO_PANEL,
+                    title_color=AO_BLUE,
+                    border_width=0,
+                    expand_x=True,
+                    expand_y=True,
+                    pad=((6, 6), (6, 6)),
+                )
             ]
         ]
 
-        scenery_column = sg.Column(scenery, expand_x=True, expand_y=True, scrollable=True, vertical_scroll_only=True, background_color=AO_BG)
+        setup_column = sg.Column(
+            setup,
+            size=(700, 560),
+            background_color=AO_BG,
+            pad=(0, 0),
+            scrollable=False,
+        )
+
+        scenery_column = sg.Column(
+            scenery,
+            size=(700, 560),
+            scrollable=True,
+            vertical_scroll_only=True,
+            background_color=AO_BG,
+            pad=(0, 0),
+        )
+
         layout = [
             [
-                sg.Text(
-                    AO_TITLE_TEXT,
-                    font=("SF Pro Display", 24, "bold"),
-                    text_color=AO_TEXT,
-                    background_color=AO_BG,
-                    pad=((8, 8), (8, 0)),
-                )
-            ],
-            [
-                sg.Text(
-                    AO_SUBTITLE_TEXT,
-                    font=("SF Pro Text", 12),
-                    text_color=AO_MUTED,
-                    background_color=AO_BG,
-                    pad=((10, 8), (0, 12)),
+                sg.Frame(
+                    '',
+                    [
+                        [
+                            sg.Column(
+                                [
+                                    [
+                                        sg.Text(
+                                            'AutoOrtho for Silicon Mac',
+                                            font=("SF Pro Display", 24, "bold"),
+                                            text_color=AO_TEXT,
+                                            background_color=AO_PANEL,
+                                            pad=((0, 8), (0, 0)),
+                                        ),
+                                        sg.Text(
+                                            'BETA',
+                                            font=("SF Pro Text", 9, "bold"),
+                                            text_color=AO_BG,
+                                            background_color=AO_BLUE,
+                                            pad=((8, 4), (7, 0)),
+                                        ),
+                                    ],
+                                    [
+                                        sg.Text(
+                                            'Orthophoto streaming for X-Plane using Apple Silicon and FUSE-T',
+                                            font=("SF Pro Text", 11),
+                                            text_color=AO_MUTED,
+                                            background_color=AO_PANEL,
+                                            pad=((0, 8), (0, 0)),
+                                        )
+                                    ],
+                                ],
+                                background_color=AO_PANEL,
+                                pad=((10, 4), (6, 4)),
+                            ),
+                            sg.Image(
+                                os.path.join(CUR_PATH, 'imgs', 'pygui_icon_header.png'),
+                                background_color=AO_PANEL,
+                                pad=((4, 4), (4, 4)),
+                            ),
+                        ],
+                    ],
+                    background_color=AO_PANEL,
+                    border_width=0,
+                    pad=((6, 6), (6, 8)),
                 )
             ],
 
             [sg.TabGroup(
                 [[
-                    sg.Tab('Setup', setup, background_color=AO_BG), 
-                    sg.Tab('Scenery', [[scenery_column]], background_color=AO_BG),
-                    sg.Tab('Logs', logs, background_color=AO_BG)
+                    sg.Tab('Setup', [[setup_column]], background_color=AO_BG, title_color=AO_TEXT), 
+                    sg.Tab('Scenery', [[scenery_column]], background_color=AO_BG, title_color=AO_TEXT),
+                    sg.Tab('Logs', logs, background_color=AO_BG, title_color=AO_TEXT)
                 ]], tab_background_color=AO_PANEL, selected_title_color=AO_TEXT, selected_background_color=AO_BLUE)
             ],
             [sg.Text(key='-EXPAND-', font='ANY 1', pad=(0,0), background_color=AO_BG, text_color=AO_TEXT)],
-            [sg.StatusBar("...", size=(74,3), key="status", auto_size_text=True, expand_x=True)],
+            [
+                sg.Button('Run', button_color=AO_BUTTON, size=(7,1), key='Run'),
+                sg.Button('Save', button_color=AO_BUTTON, size=(7,1), key='Save'),
+                sg.Button('Quit', button_color=AO_BUTTON, size=(7,1), key='Quit'),
+                sg.Push(background_color=AO_BG),
+            ],
+            [sg.StatusBar("...", size=(44,3), key="status", auto_size_text=True, expand_x=True)],
             [
                 sg.Checkbox(
                     'Stop AutoOrtho when X-Plane quits',
@@ -333,14 +464,13 @@ class ConfigUI(object):
                     tooltip='When enabled, the Mac FUSE-T launcher automatically stops and unmounts after X-Plane closes.'
                 )
             ],
-            [sg.Button('Run', button_color=AO_BUTTON), sg.Button('Save', button_color=AO_BUTTON), sg.Button('Quit', button_color=AO_BUTTON)]
             #[sg.StatusBar("...", size=(80,3), key="status", auto_size_text=True, expand_x=True)],
 
         ]
 
         font = ("Helventica", 14)
-        self.window = sg.Window(f'AutoOrtho Setup ver {__version__}', layout, font=font,
-                finalize=True, icon=self.icon_path, background_color=AO_BG)
+        self.window = sg.Window(f'AutoOrtho for Silicon Mac ver {__version__}', layout, font=font,
+                finalize=True, icon=self.icon_path, background_color=AO_BG, size=(500,800), resizable=True)
 
 
         #print = lambda *args, **kwargs: window['output'].print(*args, **kwargs)
@@ -401,12 +531,23 @@ class ConfigUI(object):
                             os.chmod(script_path, 0o755)
 
                             import subprocess
+                            import sys
+                            import json
+                            import shlex
+
                             stop_on_xplane_quit = "1" if values.get("stop_on_xplane_quit", True) else "0"
+
+                            shell_cmd = (
+                                f"cd {shlex.quote(CUR_PATH)} && "
+                                f"AUTOORTHO_RUNTIME_PYTHON={shlex.quote(sys.executable)} "
+                                f"STOP_ON_XPLANE_QUIT={stop_on_xplane_quit} "
+                                "./start_autoortho_mac_fuset.sh"
+                            )
 
                             cmd = (
                                 'tell application "Terminal"\n'
                                 'activate\n'
-                                f'do script "cd {CUR_PATH} && STOP_ON_XPLANE_QUIT={stop_on_xplane_quit} ./start_autoortho_mac_fuset.sh"\n'
+                                f'do script {json.dumps(shell_cmd)}\n'
                                 'end tell'
                             )
 
@@ -499,17 +640,56 @@ class ConfigUI(object):
 
     def update_logs(self):
         try:
-            log_file = self.cfg.paths.log_file
-            if not log_file or not os.path.exists(log_file):
-                return
+            from pathlib import Path
+            import glob
+            import os
 
-            with open(log_file) as h:
-                lines = h.readlines()[-25:]
+            sections = []
 
-            self.log.update(''.join(lines))
+            try:
+                log_file = self.cfg.paths.log_file
+                if log_file and os.path.exists(log_file):
+                    with open(log_file, "r", errors="replace") as f:
+                        lines = f.readlines()[-100:]
+                    sections.append("=== AutoOrtho log ===\n" + "".join(lines))
+            except Exception as err:
+                sections.append(f"=== AutoOrtho log ===\nCould not read app log: {repr(err)}\n")
+
+            try:
+                live_tile_log = os.path.expanduser("~/Desktop/autoortho-live-tiles.log")
+                if os.path.exists(live_tile_log):
+                    with open(live_tile_log, "r", errors="replace") as f:
+                        lines = f.readlines()[-180:]
+                    sections.append("=== Live tile downloads ===\n" + "".join(lines))
+                else:
+                    sections.append(
+                        "=== Live tile downloads ===\n"
+                        "No live tile feed yet. Click Run to start the FUSE-T launcher.\n"
+                    )
+            except Exception as err:
+                sections.append(f"=== Live tile downloads ===\nCould not read live tile log: {repr(err)}\n")
+
+            try:
+                fuse_logs = sorted(glob.glob(os.path.expanduser("~/Desktop/autoortho-mac-fuset-*.log")))
+                for fuse_log in fuse_logs[-3:]:
+                    name = Path(fuse_log).name
+                    with open(fuse_log, "r", errors="replace") as f:
+                        lines = f.readlines()[-80:]
+                    sections.append(f"=== FUSE-T log: {name} ===\n" + "".join(lines))
+            except Exception as err:
+                sections.append(f"=== FUSE-T logs ===\nCould not read FUSE-T logs: {repr(err)}\n")
+
+            text = "\n\n".join(sections).strip() or "No logs available yet."
+            self.log.update(text)
+
+            try:
+                self.log.Widget.see("end")
+            except Exception:
+                pass
+
         except Exception as err:
-            # Do not let log display problems close the GUI.
             print("update_logs ignored:", repr(err))
+
 
 
     def scenery_setup(self):

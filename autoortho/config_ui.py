@@ -152,6 +152,7 @@ class ConfigUI(object):
 
 
     def ui_loop(self):
+        global os
         # Main GUI loop
        
         scenery_path = self.cfg.paths.scenery_path
@@ -493,6 +494,16 @@ class ConfigUI(object):
         try:
             while self.running:
                 event, values = self.window.read(timeout=3000)
+
+                try:
+                    event_log_dir = pathlib.Path.home() / "Library" / "Logs" / "AutoOrthoSiliconMac"
+                    event_log_dir.mkdir(parents=True, exist_ok=True)
+                    with open(event_log_dir / "gui-events.log", "a", buffering=1, errors="replace") as event_log:
+                        if event not in (None, "__TIMEOUT__"):
+                            event_log.write(f"GUI event: {repr(event)}\n")
+                except Exception:
+                    pass
+
                 #log.info(f'VALUES: {values}')
                 #print(f"VALUES {values}")
                 #print(f"EVENT: {event}")
@@ -509,6 +520,14 @@ class ConfigUI(object):
                     self.running = False
                     self.show_status("Quiting")
                 elif event == "Run":
+
+                    try:
+                        _run_debug_dir = pathlib.Path.home() / "Library" / "Logs" / "AutoOrthoSiliconMac"
+                        _run_debug_dir.mkdir(parents=True, exist_ok=True)
+                        with open(_run_debug_dir / "run-debug.log", "a", buffering=1, errors="replace") as _run_debug:
+                            _run_debug.write("RUN handler entered\n")
+                    except Exception:
+                        pass
                     print("Updating config.")
                     self.show_status("Updating config")
                     self.save()
@@ -528,30 +547,37 @@ class ConfigUI(object):
                             continue
 
                         try:
-                            os.chmod(script_path, 0o755)
-
                             import subprocess
                             import sys
-                            import json
-                            import shlex
+                            from pathlib import Path
 
                             stop_on_xplane_quit = "1" if values.get("stop_on_xplane_quit", True) else "0"
 
-                            shell_cmd = (
-                                f"cd {shlex.quote(CUR_PATH)} && "
-                                f"AUTOORTHO_RUNTIME_PYTHON={shlex.quote(sys.executable)} "
-                                f"STOP_ON_XPLANE_QUIT={stop_on_xplane_quit} "
-                                "./start_autoortho_mac_fuset.sh"
-                            )
+                            log_dir = Path.home() / "Library" / "Logs" / "AutoOrthoSiliconMac"
+                            log_dir.mkdir(parents=True, exist_ok=True)
+                            run_log = log_dir / "fuset-run.log"
 
-                            cmd = (
-                                'tell application "Terminal"\n'
-                                'activate\n'
-                                f'do script {json.dumps(shell_cmd)}\n'
-                                'end tell'
-                            )
+                            launcher = os.path.join(CUR_PATH, "start_autoortho_mac_fuset.sh")
 
-                            subprocess.Popen(["osascript", "-e", cmd])
+                            env = os.environ.copy()
+                            env["AUTOORTHO_RUNTIME_PYTHON"] = sys.executable
+                            env["STOP_ON_XPLANE_QUIT"] = stop_on_xplane_quit
+
+                            with open(run_log, "a", buffering=1, errors="replace") as log:
+                                log.write("\n=== AutoOrtho GUI Run clicked ===\n")
+                                log.write(f"launcher={launcher}\n")
+                                log.write(f"cwd={CUR_PATH}\n")
+                                log.write(f"runtime_python={sys.executable}\n")
+                                log.write(f"stop_on_xplane_quit={stop_on_xplane_quit}\n")
+
+                                subprocess.Popen(
+                                    ["/bin/bash", launcher],
+                                    cwd=CUR_PATH,
+                                    env=env,
+                                    stdout=log,
+                                    stderr=subprocess.STDOUT,
+                                    start_new_session=True,
+                                )
 
                             stop_msg = (
                                 "AutoOrtho will stop automatically after X-Plane closes."
@@ -560,21 +586,28 @@ class ConfigUI(object):
                             )
 
                             msg = (
-                                "AutoOrtho Silicon Mac FUSE-T launcher started in a new Terminal window.\n\n"
-                                "Launch X-Plane after the Terminal says AutoOrtho FUSE-T is running.\n"
-                                f"{stop_msg}"
+                                "AutoOrtho Silicon Mac FUSE-T launcher started in the background.\n\n"
+                                "Launch X-Plane after the status log shows AutoOrtho FUSE-T is running.\n"
+                                f"{stop_msg}\n\n"
+                                f"Run log: {run_log}"
                             )
                             print(msg)
-                            self.show_status("AutoOrtho FUSE-T running. GUI remains open.")
+                            self.show_status(f"AutoOrtho FUSE-T running. Log: {run_log}")
 
-                            # Keep the GUI open and usable. Do not show a popup here,
-                            # because it can steal focus or feel like the GUI is blocked.
                             try:
                                 self.window.bring_to_front()
                             except Exception:
                                 pass
-
                         except Exception as err:
+                            try:
+                                _run_debug_dir = pathlib.Path.home() / "Library" / "Logs" / "AutoOrthoSiliconMac"
+                                _run_debug_dir.mkdir(parents=True, exist_ok=True)
+                                with open(_run_debug_dir / "run-debug.log", "a", buffering=1, errors="replace") as _run_debug:
+                                    _run_debug.write(f"RUN handler exception: {repr(err)}\n")
+                                    traceback.print_exc(file=_run_debug)
+                            except Exception:
+                                pass
+
                             msg = f"Could not start Silicon Mac FUSE-T launcher:\n\n{repr(err)}"
                             print(msg)
                             sg.popup(msg, title="AutoOrtho macOS Run Error")
@@ -656,7 +689,12 @@ class ConfigUI(object):
                 sections.append(f"=== AutoOrtho log ===\nCould not read app log: {repr(err)}\n")
 
             try:
-                live_tile_log = os.path.expanduser("~/Desktop/autoortho-live-tiles.log")
+                live_tile_candidates = [
+                    os.path.expanduser("~/Library/Logs/AutoOrthoSiliconMac/autoortho-live-tiles.log"),
+                    os.path.expanduser("~/Desktop/autoortho-live-tiles.log"),
+                ]
+                live_tile_log = next((p for p in live_tile_candidates if os.path.exists(p)), live_tile_candidates[0])
+
                 if os.path.exists(live_tile_log):
                     with open(live_tile_log, "r", errors="replace") as f:
                         lines = f.readlines()[-180:]
@@ -670,7 +708,10 @@ class ConfigUI(object):
                 sections.append(f"=== Live tile downloads ===\nCould not read live tile log: {repr(err)}\n")
 
             try:
-                fuse_logs = sorted(glob.glob(os.path.expanduser("~/Desktop/autoortho-mac-fuset-*.log")))
+                fuse_logs = sorted(
+                    glob.glob(os.path.expanduser("~/Library/Logs/AutoOrthoSiliconMac/autoortho-mac-fuset-*.log"))
+                    + glob.glob(os.path.expanduser("~/Desktop/autoortho-mac-fuset-*.log"))
+                )
                 for fuse_log in fuse_logs[-3:]:
                     name = Path(fuse_log).name
                     with open(fuse_log, "r", errors="replace") as f:

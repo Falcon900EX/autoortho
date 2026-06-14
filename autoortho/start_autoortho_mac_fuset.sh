@@ -27,7 +27,8 @@ fi
 
 FUSE_T_LIB="${FUSE_T_LIB:-/usr/local/lib/libfuse-t.dylib}"
 EXT_ROOT="${EXT_ROOT:-$HOME/AutoOrthoMounts}"
-LOG_DIR="$HOME/Desktop"
+LOG_DIR="$HOME/Library/Logs/AutoOrthoSiliconMac"
+mkdir -p "$LOG_DIR"
 STOP_ON_XPLANE_QUIT="${STOP_ON_XPLANE_QUIT:-1}"
 DISCOVERY_JSON="$LOG_DIR/autoortho-mac-fuset-discovery.json"
 
@@ -182,7 +183,7 @@ pkill -f mac_mount_fuset.py 2>/dev/null || true
 pkill -f mac_mount_ao_na_fuset.py 2>/dev/null || true
 
 echo "Starting live tile monitor..."
-LIVE_TILE_LOG="$HOME/Desktop/autoortho-live-tiles.log"
+LIVE_TILE_LOG="$LOG_DIR/autoortho-live-tiles.log"
 : > "$LIVE_TILE_LOG"
 
 AO_CACHE_DIR="$HOME/.autoortho-data/cache" AO_LIVE_TILE_LOG="$LIVE_TILE_LOG" AO_TILE_MONITOR_INTERVAL="${AO_TILE_MONITOR_INTERVAL:-1.0}" AO_TILE_HEARTBEAT_INTERVAL="${AO_TILE_HEARTBEAT_INTERVAL:-0.75}" "$PYTHON" -u "$AO_DIR/mac_live_tile_monitor.py" >> "$LIVE_TILE_LOG" 2>&1 &

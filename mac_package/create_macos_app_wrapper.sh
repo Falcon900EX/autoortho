@@ -37,6 +37,8 @@ rsync -a "$PACKAGE_DIR/wheelhouse/" "$RESOURCES_DIR/wheelhouse/" \
 
 cp "$PACKAGE_DIR/requirements-mac.txt" "$RESOURCES_DIR/requirements-mac.txt"
 
+chmod +x "$RESOURCES_DIR/autoortho/start_autoortho_mac_fuset.sh" 2>/dev/null || true
+
 cat > "$CONTENTS_DIR/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">

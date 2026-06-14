@@ -171,10 +171,22 @@ class AutoOrtho(Operations):
                 #'st_dev': 1421433975
             }
         elif path.endswith(".poison"):
-            log.info("Poison pill.  Exiting!")
-            fuse_ptr = ctypes.c_void_p(_libfuse.fuse_get_context().contents.fuse)
-            #threading.Thread(target=do_fuse_exit, args=(fuse_ptr,)).start()
-            do_fuse_exit(fuse_ptr)
+            log.info("Poison pill. Exiting!")
+
+            # FUSE-T on macOS may return a raw integer-style context pointer here,
+            # while macFUSE/libfuse paths may expose .contents.fuse. The Silicon
+            # Mac launcher already owns process shutdown and unmount cleanup, so
+            # avoid crashing getattr on Darwin when X-Plane probes .poison.
+            if platform.system() == "Darwin":
+                log.info("Darwin/FUSE-T poison pill: deferring exit to launcher cleanup.")
+            else:
+                try:
+                    fuse_ctx = _libfuse.fuse_get_context()
+                    fuse_ptr = ctypes.c_void_p(fuse_ctx.contents.fuse)
+                    #threading.Thread(target=do_fuse_exit, args=(fuse_ptr,)).start()
+                    do_fuse_exit(fuse_ptr)
+                except Exception as err:
+                    log.warning("Poison pill fuse exit ignored: %r", err)
             
             attrs = {
                 'st_atime': 1649857250.382081, 

@@ -51,6 +51,19 @@ rm -rf "$OUT_ROOT/runtime/venv"
 
 echo "Creating zip..."
 cd "$HOME/Desktop"
+
+echo "Creating portable macOS app wrapper..."
+WRAPPER_SCRIPT="$ROOT/mac_package/create_macos_app_wrapper.sh"
+WRAPPER_PACKAGE_DIR="$HOME/Desktop/AutoOrtho-Silicon-Mac-Beta"
+
+if [ -x "$WRAPPER_SCRIPT" ] && [ -d "$WRAPPER_PACKAGE_DIR" ]; then
+  "$WRAPPER_SCRIPT" "$WRAPPER_PACKAGE_DIR"
+else
+  echo "Warning: could not create app wrapper."
+  echo "  WRAPPER_SCRIPT=$WRAPPER_SCRIPT"
+  echo "  WRAPPER_PACKAGE_DIR=$WRAPPER_PACKAGE_DIR"
+fi
+
 zip -r "AutoOrtho-Silicon-Mac-Beta.zip" "AutoOrtho-Silicon-Mac-Beta" \
   -x "*/__pycache__/*" \
   -x "*.pyc" \
